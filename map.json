@@ -1,0 +1,69 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": 950,
+  "height": 520,
+  "projection": {"type": "equalEarth"},
+
+  "params": [
+    {
+      "name": "MedalSelect",
+      "value": "Gold",
+      "bind": {"input": "select", "options": ["Gold","Silver","Bronze"], "name": "Medal: "}
+    },
+    {
+      "name": "YearSelect",
+      "value": 2016,
+      "bind": {"input": "range", "min": 1896, "max": 2016, "step": 4, "name": "Year: "}
+    }
+  ],
+
+  "layer": [
+    { "data": {"graticule": true},
+      "mark": {"type": "geoshape", "stroke": "#d0d0d0", "strokeWidth": 0.5, "fill": null}
+    },
+    {
+      "data": {
+        "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
+        "format": {"type": "topojson", "feature": "countries"}
+      },
+      "transform": [
+        {
+          "lookup": "id",
+          "from": {
+            "data": {"url": "https://vega.github.io/vega-datasets/data/world-110m-country-names.tsv"},
+            "key": "id",
+            "fields": ["name"]
+          }
+        },
+        {
+          "calculate": "datum.name + '|' + YearSelect + '|' + MedalSelect",
+          "as": "key"
+        },
+        {
+          "lookup": "key",
+          "from": {
+            "data": {"url": "olympic_medals_by_country_year_with_key.csv"},
+            "key": "key",
+            "fields": ["medal_count"]
+          }
+        }
+      ],
+      "mark": {"type": "geoshape"},
+      "encoding": {
+        "color": {
+          "field": "medal_count",
+          "type": "quantitative",
+          "title": "Medals",
+          "scale": {"scheme": "reds"},
+          "legend": {"orient": "right"}
+        },
+        "tooltip": [
+          {"field": "name", "title": "Country"},
+          {"field": "medal_count", "title": "Medals"},
+          {"field": "YearSelect", "title": "Year"},
+          {"field": "MedalSelect", "title": "Medal"}
+        ]
+      }
+    }
+  ]
+}
