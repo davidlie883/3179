@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Olympic Medals Map (TopoJSON)</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.20.8"></script>
+  <style>
+    body { margin:16px; font-family: system-ui, sans-serif; background:#fafafa; }
+    #vis { max-width: 980px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <h2>Olympic Medals In Each Country</h2>
+  <div id="vis"></div>
+
+  <script>
+    const spec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+      "width": 950,
+      "height": 520,
+      "projection": {"type": "equalEarth"},
+
+      "params": [
+        {"name":"MedalSelect","value":"Gold",
+         "bind":{"input":"select","options":["Gold","Silver","Bronze"],"name":"Medal: "}},
+        {"name":"YearSelect","value":2016,
+         "bind":{"input":"range","min":1896,"max":2016,"step":4,"name":"Year: "}}
+      ],
+
+      "layer": [
+        {
+          "data":{"url":"https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/2_symbol_map/js/WorldMapWithGraticules.topojson",
+                  "format":{"type":"topojson","feature":"ne_110m_graticules_30"}},
+          "mark":{"type":"geoshape","fill":null,"stroke":"#d0d0d0","strokeWidth":0.6}
+        },
+        {
+          "data":{"url":"https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/3_choropleth_map/js/ne_110m_admin_0_countries.topojson",
+                  "format":{"type":"topojson","feature":"ne_110m_admin_0_countries"}},
+          "mark":{"type":"geoshape","stroke":"#cfcfcf","strokeWidth":0.3,"fill":"#f5f5f5"}
+        },
+        {
+          "data":{"url":"https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/3_choropleth_map/js/ne_110m_admin_0_countries.topojson",
+                  "format":{"type":"topojson","feature":"ne_110m_admin_0_countries"}},
+          "transform":[
+            {"calculate":"upper(datum.properties && datum.properties.ISO_A3 ? datum.properties.ISO_A3 : (datum.properties && datum.properties.ADM0_A3 ? datum.properties.ADM0_A3 : ''))","as":"iso3"},
+            {"filter":"datum.iso3 !== '' && datum.iso3 !== '---' && datum.iso3 !== '-99'"},
+            {"calculate":"datum.iso3","as":"noc"},
+            {"calculate":"datum.noc + '|' + YearSelect + '|' + MedalSelect","as":"key_iso"},
+            {"lookup":"key_iso",
+             "from":{"data":{"url":"https://raw.githubusercontent.com/davidlie883/3179/main/olympic_has_medal_noc_year_commas.csv",
+                             "format":{"type":"csv"}},
+                     "key":"key_iso","fields":["medal_count","has_medal"]},
+             "as":["medal_count_raw","has_medal_raw"]},
+            {"calculate":"toNumber(datum.medal_count_raw)","as":"medal_count_num"},
+            {"calculate":"toNumber(datum.has_medal_raw)","as":"has_medal_num"},
+            {"calculate":"(isValid(datum.medal_count_num)?datum.medal_count_num:(isValid(datum.has_medal_num)?datum.has_medal_num:0))>0?1:0","as":"has_selected_medal"},
+            {"calculate":"YearSelect","as":"year"},
+            {"calculate":"MedalSelect","as":"medal"}
+          ],
+          "mark":{"type":"geoshape","stroke":"#bdbdbd","strokeWidth":0.3},
+          "encoding":{
+            "color":{"field":"has_selected_medal","type":"nominal","title":"Has selected medal",
+                     "scale":{"domain":[0,1],"range":["#d9d9d9","#d7191c"]},
+                     "legend":{"values":[0,1],"labelExpr":"datum.value==1 ? 'Yes':'No'"}},
+            "tooltip":[
+              {"field":"properties.NAME","title":"Country"},
+              {"field":"noc","title":"NOC"},
+              {"field":"medal","title":"Medal"},
+              {"field":"year","title":"Year"},
+              {"field":"has_selected_medal","title":"Has selected medal (0/1)"}]
+          }
+        },
+        {
+          "data":{"url":"https://raw.githubusercontent.com/FIT3179/Vega-Lite/main/3_choropleth_map/js/ne_110m_admin_0_countries.topojson",
+                  "format":{"type":"topojson","feature":"ne_110m_admin_0_countries"}},
+          "transform":[
+            {"calculate":"upper(datum.properties && datum.properties.ISO_A3 ? datum.properties.ISO_A3 : '')","as":"iso3"},
+            {"filter":"datum.iso3 == 'AUS'"}
+          ],
+          "mark":{"type":"geoshape","fill":null,"stroke":"#ff9800","strokeWidth":2.5}
+        },
+        {
+          "data":{"values":[{"lon":133,"lat":-25}]},
+          "mark":{"type":"point","filled":true,"size":100,"opacity":1,"color":"#ff9800"},
+          "encoding":{"longitude":{"field":"lon"},"latitude":{"field":"lat"}}
+        },
+
+        /* annotation overlay */
+        {
+          "mark":{"type":"rect","fill":"#ffffff","opacity":0.9,"stroke":"#ffb74d","strokeWidth":2,"cornerRadius":6},
+          "encoding":{"x":{"value":610},"x2":{"value":910},"y":{"value":380},"y2":{"value":500}},
+          "zindex":1000
+        },
+        {
+          "mark":{"type":"text","fontSize":14,"fontWeight":"bold","align":"left","color":"#333"},
+          "encoding":{"x":{"value":620},"y":{"value":400},"text":{"value":"Annotation"}},
+          "zindex":1001
+        },
+        {
+          "mark":{"type":"text","fontSize":12,"align":"left","color":"#333"},
+          "encoding":{"x":{"value":620},"y":{"value":422},
+                      "text":{"expr":"'Countries in red won ≥1 ' + MedalSelect + ' medal in ' + YearSelect + '.'"}},
+          "zindex":1001
+        },
+        {
+          "mark":{"type":"text","fontSize":12,"align":"left","color":"#333"},
+          "encoding":{"x":{"value":620},"y":{"value":442},
+                      "text":{"value":"Highlighted example: Australia"}},
+          "zindex":1001
+        },
+        {
+          "mark":{"type":"rule","strokeDash":[6,4],"strokeWidth":2,"color":"#ff9800"},
+          "encoding":{"x":{"value":610},"y":{"value":460},"x2":{"value":770},"y2":{"value":360}},
+          "zindex":1002
+        }
+      ]
+    };
+
+    vegaEmbed("#vis", spec, {mode:"vega-lite", actions:false}).catch(console.warn);
+  </script>
+</body>
+</html>

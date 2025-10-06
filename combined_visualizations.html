@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Combined Visualisations — Week 10</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --maxw: 1100px;
+      --card-bg: #fff;
+      --card-border: #e5e7eb;
+    }
+    body {
+      margin: 16px;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial, sans-serif;
+      background: #fafafa;
+      color: #111827;
+    }
+    header {
+      max-width: var(--maxw);
+      margin: 0 auto 20px;
+    }
+    h1 { margin: 0 0 6px; }
+    p.lede { margin: 0; color: #4b5563; }
+    .vis-card {
+      max-width: var(--maxw);
+      margin: 22px auto;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      overflow: hidden;
+    }
+    .vis-card header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--card-border);
+      background: #f9fafb;
+    }
+    .vis-card h2 { margin: 0 0 4px; font-size: 18px; }
+    .vis-card p { margin: 0; color: #6b7280; }
+    .frame-wrap {
+      position: relative;
+      padding: 0;
+      height: 640px;              /* adjust if your viz is taller/shorter */
+      background: #fff;
+    }
+    iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+    footer {
+      max-width: var(--maxw);
+      margin: 18px auto;
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .note { font-size: 13px; color: #6b7280; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Combined Visualisations</h1>
+    <p class="lede">This page brings together the Week 9 map and the Week 10 map interactive visualisation</p>
+  </header>
+
+  <!-- Viz 1: Week 9 Map -->
+  <section class="vis-card">
+    <header>
+      <h2>1) Week 9 — Olympic Medals Map</h2>
+      <p>Choropleth-style map with tooltips and controls</p>
+    </header>
+    <div class="frame-wrap">
+      <!-- If your file is in the same folder, this path is correct -->
+      <iframe
+        src="homework_week9.html"
+        title="Week 9 Map"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+    <div class="note" style="padding:10px 18px 14px;">
+      File: <code>homework_week9.html</code>
+    </div>
+  </section>
+
+  <!-- Viz 2: Task 1 Visualisation -->
+  <section class="vis-card">
+    <header>
+      <h2>2) Week 10 — Interactive Visualisation</h2>
+      <p>Includes tooltips, text/line annotations, and filtering</p>
+    </header>
+    <div class="frame-wrap">
+      <iframe
+        src="homework2_week10.html"
+        title="Task 1 Visualisation"
+        loading="lazy"
+        referrerpolicy="no-referrer"
+      ></iframe>
+    </div>
+    <div class="note" style="padding:10px 18px 14px;">
+      File: <code>homework2_week10.html</code>
+    </div>
+  </section>
+
+</body>
+</html>
